@@ -1,0 +1,32 @@
+GO! SNAIL GO!  —  Mocha vs Mochi
+=================================
+
+CÓMO ABRIRLO
+- Doble clic en index.html (Chrome o Edge). Funciona sin internet.
+- En el lobby, el botón ⛶ pone pantalla completa (ideal en el proyector).
+- Para subirlo a Render o GitHub Pages: sube TODA la carpeta tal cual (static site).
+
+CÓMO SE JUEGA
+- Cada equipo tiene su caracol. Las palabras de la oración están revueltas en la concha.
+- ↺ / ↻ giran la concha (también se puede girar arrastrando la concha con el dedo).
+- La palabra resaltada en amarillo es la que está en la SALIDA (el circulito ➜).
+- Si es la palabra correcta, GO! y… popis 💩 → la palabra vuela a la barra.
+- Sin penalización por error: solo reacciones. Gana la ronda quien termine primero.
+- Si se acaba el tiempo (60 s), gana quien lleve más palabras. Empate = no cuenta.
+- Mejor de 3, 5 o 7. La pantalla final da feedback por equipo y repasa las oraciones.
+
+TECLADO (para probar desde el PC)
+- Mocha: A / D giran, S hace GO!
+- Mochi: ← / → giran, ↓ hace GO!
+- Esc: pausa
+
+AGREGAR TUS PROPIAS ORACIONES
+- Abre sentences.js con el Bloc de notas.
+- Cada línea es: ["tema gramatical", "oración para Mocha.", "oración para Mochi."]
+- Usa dos oraciones de la misma estructura y largo parecido (6–10 palabras es ideal).
+- Evita comas (la coma delataría el orden). El punto o "?" final se muestra solo.
+
+CRÉDITOS DE MODELOS 3D (licencia CC BY 4.0, ya incluidos en el lobby)
+- "Owl soft toy" y "Star soft toy" por CoFate
+- "Button low poly" por skalson
+- "Sandwich plush" por SunnyBuns

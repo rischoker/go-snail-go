@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Go! Snail Go!</title>
+<link rel="icon" href="assets/img/poop.webp">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===== WORLD (animated diorama background) ===== -->
+  <div id="world">
+    <div id="sky"></div>
+    <div id="far"></div>
+    <img id="sun" src="assets/img/sun.webp" alt="">
+    <div id="cloudLayer"></div>
+    <div id="airLayer"></div>
+    <svg id="rainbow" viewBox="0 0 1000 520" aria-hidden="true">
+      <g fill="none" stroke-linecap="round">
+        <path d="M60 520 A440 440 0 0 1 940 520" stroke="#e85a4f" stroke-width="44"/>
+        <path d="M104 520 A396 396 0 0 1 896 520" stroke="#f39a3c" stroke-width="44"/>
+        <path d="M148 520 A352 352 0 0 1 852 520" stroke="#f6d04d" stroke-width="44"/>
+        <path d="M192 520 A308 308 0 0 1 808 520" stroke="#7cc35b" stroke-width="44"/>
+        <path d="M236 520 A264 264 0 0 1 764 520" stroke="#4fa3d9" stroke-width="44"/>
+        <path d="M280 520 A220 220 0 0 1 720 520" stroke="#9a72c9" stroke-width="44"/>
+      </g>
+      <g fill="none" stroke="#fff8e6" stroke-width="3" stroke-dasharray="10 9" opacity=".85">
+        <path d="M82 520 A418 418 0 0 1 918 520"/><path d="M126 520 A374 374 0 0 1 874 520"/>
+        <path d="M170 520 A330 330 0 0 1 830 520"/><path d="M214 520 A286 286 0 0 1 786 520"/>
+        <path d="M258 520 A242 242 0 0 1 742 520"/><path d="M302 520 A198 198 0 0 1 698 520"/>
+      </g>
+      <image href="assets/img/fcloud1.webp" x="-10" y="430" width="190" height="102"/>
+      <image href="assets/img/fcloud2.webp" x="830" y="436" width="180" height="103"/>
+    </svg>
+    <div id="mid"></div>
+    <div id="owlSpot"><img id="owl" src="assets/img/owl.webp" alt=""></div>
+    <img id="toast" src="assets/img/toast.webp" alt="">
+    <div id="fore"></div>
+    <div id="bugLayer"></div>
+  </div>
+
+  <!-- ===== SPLASH ===== -->
+  <section id="splash" class="screen show">
+    <div class="splashArt"></div>
+    <div class="tapToStart felt-text">Tap to start!</div>
+  </section>
+
+  <!-- ===== LOBBY ===== -->
+  <section id="lobby" class="screen">
+    <img class="logo" src="assets/img/logo.webp" alt="Go! Snail Go!">
+    <div id="lobbyMocha" class="lobbySnail left"></div>
+    <div id="lobbyMochi" class="lobbySnail right"></div>
+
+    <div class="panel lobbyPanel">
+      <div class="panelTitle">Choose your level</div>
+      <div id="levelRow" class="levelRow"></div>
+      <div class="panelTitle small">Match length</div>
+      <div id="boRow" class="boRow">
+        <button class="pill" data-bo="3">Best of 3</button>
+        <button class="pill" data-bo="5">Best of 5</button>
+        <button class="pill" data-bo="7">Best of 7</button>
+      </div>
+      <button id="playBtn" class="feltBtn big"><span>PLAY!</span></button>
+    </div>
+
+    <div class="howTo">
+      <span class="howIcon">↺</span><span class="howIcon">↻</span> spin the shell &nbsp;·&nbsp; right word at the <b>exit</b>? &nbsp;<span class="howGo">GO!</span>
+    </div>
+    <div class="corner">
+      <button id="fsBtn" class="roundBtn" title="Full screen">⛶</button>
+      <button id="sndBtn" class="roundBtn" title="Sound">♪</button>
+    </div>
+    <div class="credits">3D plush models: “Owl soft toy” &amp; “Star soft toy” by CoFate, “Button low poly” by skalson, “Sandwich plush” by SunnyBuns — CC BY 4.0 (sketchfab.com)</div>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section id="game" class="screen">
+    <div id="barMocha" class="bar left">
+      <div class="plate"><span class="pname">Team Mocha</span><span class="pips"></span></div>
+      <div class="chips"></div>
+    </div>
+    <div id="barMochi" class="bar right">
+      <div class="plate"><span class="pname">Team Mochi</span><span class="pips"></span></div>
+      <div class="chips"></div>
+    </div>
+    <div id="timer"><div class="tface"></div><img src="assets/img/timer.webp" alt=""><span id="tnum">60</span></div>
+    <div id="roundTag">ROUND 1</div>
+    <div id="arenaMocha" class="arena"></div>
+    <div id="arenaMochi" class="arena"></div>
+    <div id="ctrlMocha" class="controls">
+      <button class="spin ccw" data-dir="-1"><img src="assets/img/arrow.webp" alt="spin left"></button>
+      <button class="goBtn"><span>GO!</span></button>
+      <button class="spin cw" data-dir="1"><img src="assets/img/arrow.webp" alt="spin right"></button>
+    </div>
+    <div id="ctrlMochi" class="controls">
+      <button class="spin ccw" data-dir="-1"><img src="assets/img/arrow.webp" alt="spin left"></button>
+      <button class="goBtn"><span>GO!</span></button>
+      <button class="spin cw" data-dir="1"><img src="assets/img/arrow.webp" alt="spin right"></button>
+    </div>
+    <button id="pauseBtn" class="roundBtn small" title="Menu">☰</button>
+    <div id="banner" class="felt-text"></div>
+    <div id="pauseMenu" class="overlay">
+      <div class="panel">
+        <div class="panelTitle">Paused</div>
+        <button id="resumeBtn" class="feltBtn"><span>Resume</span></button>
+        <button id="quitBtn" class="feltBtn red"><span>Menu</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== END ===== -->
+  <section id="end" class="screen">
+    <div id="endTitle" class="felt-text"></div>
+    <div id="endScore"></div>
+    <div class="podium">
+      <img class="trophy" src="assets/img/trophy.webp" alt="">
+      <div id="endWinner" class="endSnail"></div>
+      <div id="endOther" class="endSnail"></div>
+    </div>
+    <div id="fbMocha" class="fbCard left"></div>
+    <div id="fbMochi" class="fbCard right"></div>
+    <div id="review" class="review"></div>
+    <div class="endBtns">
+      <button id="rematchBtn" class="feltBtn"><span>Rematch</span></button>
+      <button id="menuBtn" class="feltBtn red"><span>Menu</span></button>
+    </div>
+  </section>
+
+  <div id="fx"></div>
+</div>
+
+<audio id="mLobby" src="assets/snd/lobby.mp3" loop preload="auto"></audio>
+<audio id="mGame" src="assets/snd/game.mp3" loop preload="auto"></audio>
+<script src="sentences.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
