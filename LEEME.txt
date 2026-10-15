@@ -15,6 +15,11 @@ CÓMO SE JUEGA
 - Si se acaba el tiempo (60 s), gana quien lleve más palabras. Empate = no cuenta.
 - Mejor de 3, 5 o 7. La pantalla final da feedback por equipo y repasa las oraciones.
 
+VOCES
+- Mocha y Mochi tienen voces generadas con ElevenLabs (assets/snd/voice/).
+  Mocha suena más grave y Mochi más agudo. Hay varias versiones de cada sonido
+  y el juego elige una al azar para que no suene repetitivo.
+
 TECLADO (para probar desde el PC)
 - Mocha: A / D giran, S hace GO!
 - Mochi: ← / → giran, ↓ hace GO!

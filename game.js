@@ -82,6 +82,22 @@ function noise(d, vol = .2, freq = 1200, delay = 0, q = 1, f2 = null) {
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
   s.connect(fl); fl.connect(g); g.connect(master); s.start(t); s.stop(t + d + 0.05);
 }
+
+/* ---------- snail voices (ElevenLabs) — Mocha lower, Mochi higher ---------- */
+const VOICE_N = { yay: 3, strain: 3, relief: 3, huh: 3, woohoo: 2, cry: 1, dizzy: 3, snore: 3, giggle: 3 };
+const voiceBank = {};
+['mocha', 'mochi'].forEach(t => Object.entries(VOICE_N).forEach(([k, n]) => {
+  for (let i = 1; i <= n; i++) { const a = new Audio(`assets/snd/voice/${t}_${k}${i}.mp3`); a.preload = 'auto'; (voiceBank[t + k] = voiceBank[t + k] || []).push(a); }
+}));
+const lastVoice = {};
+function voice(team, kind, vol = 0.85) {
+  if (muted) return;
+  const list = voiceBank[team + kind]; if (!list) return;
+  const prev = lastVoice[team]; if (prev) { try { prev.pause(); } catch (e) {} }
+  const a = pick(list); a.currentTime = 0; a.volume = vol;
+  const p = a.play(); if (p) p.catch(() => {});
+  lastVoice[team] = a;
+}
 const sfx = {
   ui() { tone(660, .08, 'triangle', .18, 990); },
   spin(side) { const b = side === 'mocha' ? 420 : 520; tone(b + rand(-20, 20), .05, 'square', .06, b * 1.4); noise(.04, .08, 3000); },
@@ -301,7 +317,7 @@ class Snail {
     this.sel = (this.sel - dir + this.items.length * 4) % this.items.length;
     this.layout();
     const now = performance.now(); this.spinTimes.push(now); this.spinTimes = this.spinTimes.filter(t => now - t < 2600);
-    if (this.spinTimes.length >= 11) { this.say('dizzy', 1100); this.spinTimes = []; }
+    if (this.spinTimes.length >= 11) { this.say('dizzy', 1100); this.spinTimes = []; voice(this.team, 'dizzy'); }
   }
   selected() { return this.items[this.sel]; }
   removeSelected() {
@@ -381,7 +397,7 @@ function buildLobbySnail(host, team, name) {
   const s = new Snail(host, team, { autoSpin: team === 'mocha' ? 18 : -18 });
   const n = document.createElement('div'); n.className = 'lobbyName'; n.innerHTML = `<span>${name}</span>`; host.appendChild(n);
   s.shell.style.pointerEvents = 'auto'; s.body.style.pointerEvents = 'auto';
-  const poke = () => { initAudio(); sfx.hop(); s.anim('hop', 600); s.say(pick(['celebrate', 'surprised', 'smug', 'happy']), 900); };
+  const poke = () => { initAudio(); sfx.hop(); voice(team, pick(['giggle', 'yay', 'giggle'])); s.anim('hop', 600); s.say(pick(['celebrate', 'surprised', 'smug', 'happy']), 900); };
   host.addEventListener('pointerdown', e => { e.preventDefault(); poke(); });
   lobbySnails.push(s); return s;
 }
@@ -500,12 +516,12 @@ function doGo(t) {
     M.stats[t].correct++;
     const last = T.step === T.words.length;
     if (last) { T.done = true; T.finishTime = (now - R.startAt) / 1000; R.over = true; R.active = false; lockControls(true); }
-    s.say('strain', 300); s.anim('strain', 320); sfx.strain();
+    s.say('strain', 300); s.anim('strain', 320); sfx.strain(); voice(t, 'strain', 0.75);
     const removed = s.removeSelected();
     const chip = $$('.chip', bars[t])[idx];
     const word = idx === 0 ? T.words[0] : T.words[idx];
     setTimeout(() => {
-      s.say('relief', 450); sfx.plop(); sfx.whoosh();
+      s.say('relief', 450); sfx.plop(); sfx.whoosh(); if (!last) voice(t, Math.random() < .55 ? 'relief' : 'yay');
       const from = s.local(s.tail); puffs(from.x, from.y, 5);
       const to = centerOf(chip);
       flyPoop(from, to, word, last, () => {
@@ -518,7 +534,7 @@ function doGo(t) {
     T.wrong++; M.stats[t].wrong++;
     const el = it.el; el.classList.add('bad'); setTimeout(() => el.classList.remove('bad'), 450);
     s.say('surprised', 260); setTimeout(() => { if (R && !R.over) s.say(pick(['confused', 'confused', 'nervous']), 700); }, 260);
-    s.anim('shake', 420); sfx.wrong();
+    s.anim('shake', 420); sfx.wrong(); voice(t, 'huh');
   }
 }
 
@@ -540,6 +556,7 @@ function endRound(winner) {
       const pip = $$('.pips img', bars[winner])[M.wins[winner] - 1]; if (pip) pip.classList.add('won');
       snails[winner].say('celebrate', 3200); snails[winner].anim('party', 3000);
       snails[loser].say('cry', 2200); setTimeout(() => snails[loser].say('relief', 1000), 2200);
+      voice(winner, 'woohoo'); setTimeout(() => voice(loser, 'cry', 0.7), 700);
       rainbow.classList.add('on');
       const c = snails[winner].local({ x: 380, y: 200 }); confetti(40, c.x - 400, c.x + 400);
       sfx.win();
@@ -585,6 +602,7 @@ function loop(now) {
       else if (R.time <= 10) f = 'nervous';
       else if (mine - other >= 2) f = 'smug';
       else if (other - mine >= 3) f = 'nervous';
+      if (f === 'sleepy' && s.base !== 'sleepy') voice(t, 'snore', 0.6);
       s.base = f;
     });
   } else if (R && !R.active) TEAMS.forEach(t => snails[t].base = 'happy');
@@ -642,6 +660,7 @@ function endMatch(winner) {
   $('#endWinner').innerHTML = ''; $('#endOther').innerHTML = ''; endSnails.length = 0;
   const w = new Snail($('#endWinner'), winner, {}), o = new Snail($('#endOther'), loser, {});
   w.base = 'celebrate'; w.anim('party'); o.base = 'happy';
+  setTimeout(() => { voice(winner, 'woohoo'); setTimeout(() => voice(loser, 'giggle'), 900); }, 400);
   endSnails.push(w, o);
   $('#endWinner').style.left = winner === 'mocha' ? '-30px' : '370px';
   $('#endOther').style.left = winner === 'mocha' ? '370px' : '-30px';
