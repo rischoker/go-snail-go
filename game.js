@@ -361,7 +361,7 @@ class Snail {
       while (Math.abs(acc) >= st) { const d = Math.sign(acc); acc -= d * this.step; onStep(d); }
     });
     const end = e => { if (e.pointerId === id) id = null; };
-    this.shell.addEventListener('pointerup', end); this.shell.addEventListener('pointercancel', end);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => this.shell.addEventListener(ev, end));
   }
 }
 
@@ -540,6 +540,7 @@ function doGo(t) {
 
 function endRound(winner) {
   if (R.ended) return; R.ended = true;
+  stopAllHolds();
   R.over = true; R.active = false; lockControls(true);
   if (!winner) {   // time up
     const a = R.teams.mocha.step, b = R.teams.mochi.step;
@@ -614,12 +615,32 @@ function loop(now) {
 requestAnimationFrame(loop);
 
 /* controls: multi-touch friendly (each button tracks its own finger) */
+const holdStoppers = [];
+const stopAllHolds = () => holdStoppers.forEach(f => f());
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopAllHolds(); });
+addEventListener('blur', stopAllHolds);
 TEAMS.forEach(t => {
   $$('.spin', ctrls[t]).forEach(b => {
-    const dir = +b.dataset.dir; let rep = null, hold = null;
-    const stop = () => { clearTimeout(hold); clearInterval(rep); b.classList.remove('press'); };
-    b.addEventListener('pointerdown', e => { e.preventDefault(); initAudio(); b.setPointerCapture(e.pointerId); b.classList.add('press'); doSpin(t, dir); hold = setTimeout(() => { rep = setInterval(() => doSpin(t, dir), 170); }, 380); });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, stop));
+    // Hold-to-repeat, hardened for touch boards: only one finger per arrow, every
+    // timer is always cleared, and the repeat stops by itself if the board never
+    // reports the finger lifting (lost touch events were making shells spin forever).
+    const dir = +b.dataset.dir; let rep = null, hold = null, pid = null, startedAt = 0;
+    const stop = () => { clearTimeout(hold); clearInterval(rep); hold = rep = null; pid = null; b.classList.remove('press'); };
+    holdStoppers.push(stop);
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); initAudio();
+      if (pid !== null) return;                      // a second finger on the same arrow is ignored
+      stop(); pid = e.pointerId; startedAt = performance.now();
+      try { b.setPointerCapture(e.pointerId); } catch (err) {}
+      b.classList.add('press'); doSpin(t, dir);
+      hold = setTimeout(() => {
+        rep = setInterval(() => {
+          if (!canPlay(t) || performance.now() - startedAt > 2500) { stop(); return; }  // safety cap
+          doSpin(t, dir);
+        }, 170);
+      }, 380);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture', 'pointerleave'].forEach(ev => b.addEventListener(ev, e => { if (pid === null || e.pointerId === pid) stop(); }));
   });
   const g = $('.goBtn', ctrls[t]);
   g.addEventListener('pointerdown', e => { e.preventDefault(); initAudio(); g.classList.add('press'); doGo(t); });
@@ -638,6 +659,7 @@ addEventListener('keydown', e => {
 function togglePause(v = !paused) {
   if (screen !== 'game') return;
   paused = v; $('#pauseMenu').classList.toggle('show', v);
+  if (v) stopAllHolds();
   if (currentMusic && !muted) { if (v) currentMusic.pause(); else currentMusic.play().catch(() => {}); }
 }
 tap($('#pauseBtn'), () => { sfx.ui(); togglePause(true); });
